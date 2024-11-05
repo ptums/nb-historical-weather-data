@@ -44,7 +44,7 @@ const schema = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 
 export function YearMonthForm() {
-  const { month, setMonth, year, setYear } = useYearMonth();
+  const { month, setMonth, year, setYear, setIsSubmitted } = useYearMonth();
   const {
     handleSubmit,
     formState: { errors },
@@ -58,9 +58,12 @@ export function YearMonthForm() {
   });
 
   const onSubmit = (data: FormData) => {
-    alert(`Form data: ${JSON.stringify(data)}`);
     setMonth(data.month as string);
     setYear(typeof data.year === "number" ? data.year : 1850);
+
+    setTimeout(() => {
+      setIsSubmitted(true);
+    }, 900);
   };
 
   return (
