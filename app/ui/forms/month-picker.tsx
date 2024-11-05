@@ -6,26 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { months } from "@/lib/utils";
 
 type MonthPickerProps = {
   value: string | number;
   onChange: (value: string) => void;
 };
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 export const MonthPicker: React.FC<MonthPickerProps> = ({
   value,
