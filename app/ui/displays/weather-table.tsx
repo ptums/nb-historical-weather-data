@@ -56,13 +56,14 @@ const mapOpenMeteoToWeatherData = (data: {
           highTemp: number;
           lowTemp: number;
           weather: WeatherData["weather"];
-          windSpeed: string;
+          windSpeed: number;
         }
       ) => WeatherData[];
     };
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     weathercode: number[];
+    windspeed_10m_max: number[];
   };
 }): WeatherData[] => {
   return data.daily.time.map((date: string, index: number) => ({
@@ -70,7 +71,7 @@ const mapOpenMeteoToWeatherData = (data: {
     highTemp: Math.round(data.daily.temperature_2m_max[index]),
     lowTemp: Math.round(data.daily.temperature_2m_min[index]),
     weather: mapWeatherCode(data.daily.weathercode[index]),
-    windSpeed: "new", // OpenMeteo doesn't provide moon phase data, so we're using a placeholder
+    windSpeed: Math.round(data.daily.windspeed_10m_max[index]),
   }));
 };
 
