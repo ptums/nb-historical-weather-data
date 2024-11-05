@@ -17,12 +17,6 @@ const schema = yup.object().shape({
       "is-valid-month",
       'Month must be a number from 1 to 12 or a two-digit string from "01" to "12"',
       (value) => {
-        console.log(
-          "Month value being validated:",
-          value,
-          "Type:",
-          typeof value
-        );
         if (typeof value === "string") {
           return /^(0[1-9]|1[0-2])$/.test(value);
         }
@@ -79,7 +73,6 @@ export function YearMonthForm() {
             <MonthPicker
               value={month}
               onChange={(value) => {
-                console.log("MonthPicker onChange:", value);
                 setMonth(value);
                 setValue("month", value, { shouldValidate: true });
               }}
@@ -107,7 +100,7 @@ export function YearMonthForm() {
           <Button
             type="submit"
             disabled={isSubmitted}
-            className="w-full sm:w-1/3 bg-green-400 hover:bg-green-500 text-black rounded-xl px-8 py-2 h-[42px]"
+            className="w-full sm:w-1/4 bg-green-400 hover:bg-green-500 text-black rounded-xl px-8 py-2 h-[42px]"
           >
             Go
           </Button>

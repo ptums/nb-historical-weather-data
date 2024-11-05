@@ -33,10 +33,6 @@ const fetchWeatherData = async (
   );
   const data = await response.json();
 
-  console.log({
-    data,
-  });
-
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
@@ -77,10 +73,6 @@ const mapOpenMeteoToWeatherData = (data: {
 
 export function WeatherTable() {
   const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
-  console.log({
-    month,
-    year,
-  });
   const { data, isLoading, error } = useQuery({
     queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
     queryFn: () =>
