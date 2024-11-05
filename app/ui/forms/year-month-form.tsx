@@ -44,7 +44,8 @@ const schema = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 
 export function YearMonthForm() {
-  const { month, setMonth, year, setYear, setIsSubmitted } = useYearMonth();
+  const { month, setMonth, year, setYear, setIsSubmitted, isSubmitted } =
+    useYearMonth();
   const {
     handleSubmit,
     formState: { errors },
@@ -63,7 +64,7 @@ export function YearMonthForm() {
 
     setTimeout(() => {
       setIsSubmitted(true);
-    }, 900);
+    }, 500);
   };
 
   return (
@@ -105,6 +106,7 @@ export function YearMonthForm() {
           </div>
           <Button
             type="submit"
+            disabled={isSubmitted}
             className="w-full sm:w-1/3 bg-green-400 hover:bg-green-500 text-black rounded-xl px-8 py-2 h-[42px]"
           >
             Go

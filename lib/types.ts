@@ -2,7 +2,19 @@ export type WeatherData = {
   date: number;
   highTemp: number;
   lowTemp: number;
-  weather: "sunny" | "cloudy" | "partlyCloudy" | "rainy";
+  weather:
+    | "clear"
+    | "mainlyClear"
+    | "partlyCloudy"
+    | "overcast"
+    | "fog"
+    | "drizzle"
+    | "rain"
+    | "snow"
+    | "rainShowers"
+    | "snowShowers"
+    | "thunderstorm"
+    | "unknown";
   moonPhase:
     | "new"
     | "waxingCrescent"

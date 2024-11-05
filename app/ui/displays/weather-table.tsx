@@ -15,11 +15,17 @@ import {
   Moon,
   Circle,
   CircleDot,
+  Droplets,
+  Snowflake,
+  CloudLightning,
+  CloudFog,
 } from "lucide-react";
 import { WeatherData } from "@/lib/types";
 import { useYearMonth } from "@/app/context/year-month-context";
-import { getMonthName } from "@/lib/utils";
+import { getMonthName, mapWeatherCode } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { DUMMIE_DATA_FLAG } from "@/lib/constants";
+import { dummieData } from "@/lib/dummie-data";
 
 const columnHelper = createColumnHelper<WeatherData>();
 
@@ -58,14 +64,30 @@ const columns = [
     cell: (info) => {
       const weather = info.getValue();
       switch (weather) {
-        case "sunny":
+        case "clear":
           return <Sun className="text-yellow-400" />;
-        case "cloudy":
-          return <Cloud className="text-gray-400" />;
+        case "mainlyClear":
+          return <Sun className="text-yellow-400" />;
         case "partlyCloudy":
           return <CloudSun className="text-gray-400" />;
-        case "rainy":
+        case "overcast":
+          return <Cloud className="text-gray-400" />;
+        case "fog":
+          return <CloudFog className="text-gray-400" />;
+        case "drizzle":
+          return <Droplets className="text-blue-300" />;
+        case "rain":
           return <CloudRain className="text-blue-400" />;
+        case "snow":
+          return <Snowflake className="text-blue-200" />;
+        case "rainShowers":
+          return <CloudRain className="text-blue-500" />;
+        case "snowShowers":
+          return <Snowflake className="text-blue-300" />;
+        case "thunderstorm":
+          return <CloudLightning className="text-yellow-500" />;
+        case "unknown":
+          return <Cloud className="text-gray-300" />;
         default:
           return null;
       }
@@ -73,18 +95,17 @@ const columns = [
     header: () => <span>Weather</span>,
   }),
   columnHelper.accessor("highTemp", {
-    cell: (info) => `${info.getValue()}°`,
+    cell: (info) => `${info.getValue()}°F`,
     header: () => <span>High</span>,
   }),
   columnHelper.accessor("lowTemp", {
-    cell: (info) => `${info.getValue()}°`,
+    cell: (info) => `${info.getValue()}°F`,
     header: () => <span>Low</span>,
   }),
 ];
-
 const fetchWeatherData = async (
-  latitude: number,
-  longitude: number,
+  lat: number,
+  long: number,
   month: number,
   year: number
 ) => {
@@ -96,21 +117,19 @@ const fetchWeatherData = async (
   ).getDate()}`;
 
   const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`
+    `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${long}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,weathercode,moonrise,moonset,moon_phase&temperature_unit=fahrenheit&timezone=auto`
   );
+  const data = await response.json();
+
+  console.log({
+    data,
+  });
 
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
 
-  return response.json();
-};
-
-const mapWeatherCode = (code: number): WeatherData["weather"] => {
-  if (code <= 1) return "sunny";
-  if (code <= 3) return "partlyCloudy";
-  if (code <= 48) return "cloudy";
-  return "rainy";
+  return data;
 };
 
 const mapOpenMeteoToWeatherData = (data: {
@@ -124,7 +143,7 @@ const mapOpenMeteoToWeatherData = (data: {
           date: number;
           highTemp: number;
           lowTemp: number;
-          weather: "sunny" | "cloudy" | "partlyCloudy" | "rainy";
+          weather: WeatherData["weather"];
           moonPhase: string;
         }
       ) => WeatherData[];
@@ -149,10 +168,14 @@ export function WeatherTable() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
     queryFn: () => fetchWeatherData(40.4862, -74.4518, parseInt(month), year),
-    enabled: isSubmitted, // This will only enable the query when isSubmitted is true
+    enabled: isSubmitted && !DUMMIE_DATA_FLAG, // This will only enable the query when isSubmitted is true
     staleTime: Infinity, // You might want to adjust this based on how often you need fresh data
   });
   const weatherData = useMemo(() => {
+    if (DUMMIE_DATA_FLAG) {
+      return dummieData;
+    }
+
     return data ? mapOpenMeteoToWeatherData(data) : [];
   }, [data]);
 
