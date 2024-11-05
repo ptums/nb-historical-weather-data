@@ -15,13 +15,5 @@ export type WeatherData = {
     | "snowShowers"
     | "thunderstorm"
     | "unknown";
-  moonPhase:
-    | "new"
-    | "waxingCrescent"
-    | "firstQuarter"
-    | "waxingGibbous"
-    | "full"
-    | "waningGibbous"
-    | "lastQuarter"
-    | "waningCrescent";
+  windSpeed: number;
 };

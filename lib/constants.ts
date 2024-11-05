@@ -4,3 +4,8 @@ export const SITE_DEFAULTS = {
 };
 
 export const DUMMIE_DATA_FLAG = true;
+
+export const LOCATION = {
+  lat: 40.4862,
+  long: -74.4518,
+};
