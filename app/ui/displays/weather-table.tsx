@@ -76,7 +76,10 @@ const mapOpenMeteoToWeatherData = (data: {
 
 export function WeatherTable() {
   const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
-
+  console.log({
+    month,
+    year,
+  });
   const { data, isLoading, error } = useQuery({
     queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
     queryFn: () =>

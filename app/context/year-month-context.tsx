@@ -22,7 +22,7 @@ interface YearMonthProviderProps {
 export const YearMonthProvider: React.FC<YearMonthProviderProps> = ({
   children,
 }) => {
-  const [month, setMonth] = useState<string>("12");
+  const [month, setMonth] = useState<string>("01");
   const [year, setYear] = useState<number>(1950);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 

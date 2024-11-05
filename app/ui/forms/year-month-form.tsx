@@ -53,8 +53,8 @@ export function YearMonthForm() {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      month: "",
-      year: year.toString() === "" ? undefined : year,
+      month: "01",
+      year: 1950,
     },
   });
 
