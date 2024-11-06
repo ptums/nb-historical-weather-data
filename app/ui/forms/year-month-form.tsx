@@ -9,6 +9,8 @@ import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
 import { SiteTitle } from "../site-title";
+import classNames from "classnames";
+import { useDarkMode } from "@/app/context/dark-mode-context";
 
 const schema = yup.object().shape({
   month: yup
@@ -40,6 +42,7 @@ type FormData = yup.InferType<typeof schema>;
 export function YearMonthForm() {
   const { month, setMonth, year, setYear, setIsSubmitted, isSubmitted } =
     useYearMonth();
+  const { isDarkMode } = useDarkMode();
   const {
     handleSubmit,
     formState: { errors },
@@ -64,7 +67,12 @@ export function YearMonthForm() {
   return (
     <>
       <SiteTitle />
-      <div className="bg-white rounded-3xl p-8 shadow-lg">
+      <div
+        className={classNames("rounded-3xl p-8 shadow-lg", {
+          "bg-white": !isDarkMode,
+          "bg-yellow-50": isDarkMode,
+        })}
+      >
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col sm:flex-row items-center gap-4"
