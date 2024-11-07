@@ -2,6 +2,8 @@ package com.example.api.controller;
 
 import com.example.api.model.WeatherData;
 import com.example.api.service.WeatherDataService;
+import java.time.Duration;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -9,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-import java.time.Duration;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/weather")
@@ -42,5 +42,33 @@ public class WeatherDataController {
         List<WeatherData> monthlyData = weatherDataService.getWeatherDataForMonth(year, month);
         return Flux.fromIterable(monthlyData)
                    .delayElements(Duration.ofMillis(100)); // Delay each element by 100ms for demonstration
+    }
+
+   @PostMapping(value = "/monthly/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> postMonthlyWeatherData(
+            @PathVariable int year,
+            @PathVariable int month,
+            @RequestBody WeatherData weatherData) {
+        try {
+            // Validate the incoming data
+            if (!isValidWeatherData(year, month, weatherData)) {
+                return ResponseEntity.badRequest().body("Invalid weather data");
+            }
+
+            // Save the weather data
+            weatherDataService.saveWeatherData(year, month, weatherData);
+
+            return ResponseEntity.ok("Weather data saved successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body("Error saving weather data");
+        }
+    }
+
+    private boolean isValidWeatherData(int year, int month, WeatherData data) {
+        return (data != null && year > 0 && month > 0) &&
+               month > 0 && month <= 12 &&
+               year > 0 &&
+               data.getWeather() != null &&
+               List.of("clear", "mainlyClear", "partlyCloudy", "overcast", "fog", "drizzle", "rain", "snow", "rainShowers", "snowShowers", "thunderstorm", "unknown").contains(data.getWeather());
     }
 }
