@@ -1,9 +1,7 @@
 package com.example.api.model;
 
-import com.example.api.converter.FlexibleLocalDateAttributeConverter;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-
 
 @Entity
 @Table(name = "weather_data")
@@ -14,7 +12,6 @@ public class WeatherData {
     private Long id;
 
     @Column(nullable = false)
-    @Convert(converter = FlexibleLocalDateAttributeConverter.class)
     private LocalDate date;
 
     @Column(name = "high_temp", nullable = false)
@@ -34,6 +31,7 @@ public class WeatherData {
     private Long monthsYearsId;
 
     // Getters and setters
+
     public Long getId() {
         return id;
     }
@@ -74,7 +72,6 @@ public class WeatherData {
         this.weather = weather;
     }
 
-
     public double getWindSpeed() {
         return windSpeed;
     }
@@ -91,7 +88,6 @@ public class WeatherData {
         this.monthsYearsId = monthsYearsId;
     }
 
-
     @Override
     public String toString() {
         return "WeatherData{" +
@@ -106,6 +102,7 @@ public class WeatherData {
     }
 
     public enum Weather {
-        CLEAR, MAINLY_CLEAR, PARTLY_CLOUDY, OVERCAST, FOG, DRIZZLE, RAIN, SNOW, RAIN_SHOWERS, SNOW_SHOWERS, THUNDERSTORM, UNKNOWN
+        CLEAR, MAINLY_CLEAR, PARTLY_CLOUDY, OVERCAST, FOG, DRIZZLE, RAIN, SNOW, RAIN_SHOWERS, SNOW_SHOWERS,
+        THUNDERSTORM, UNKNOWN
     }
 }

@@ -45,29 +45,4 @@ public class WeatherDataController {
         return Flux.fromIterable(monthlyData)
                 .delayElements(Duration.ofMillis(100)); // Delay each element by 100ms for demonstration
     }
-
-    @PostMapping(value = "/monthly/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> postMonthlyWeatherData(
-            @PathVariable int year,
-            @PathVariable int month,
-            @RequestBody OpenMeteoData weatherData) {
-        try {
-            logger.info("year {}, month {}", year, month);
-            // Validate the incoming data
-            if (!isValidWeatherData(year, month)) {
-                return ResponseEntity.badRequest().body("Invalid weather data");
-            }
-
-            // Save the weather data
-            weatherDataService.saveWeatherData(year, month, weatherData);
-
-            return ResponseEntity.ok("Weather data saved successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError().body("Error saving weather data");
-        }
-    }
-
-    private boolean isValidWeatherData(int year, int month) {
-        return month > 0 && month <= 12 && year > 0;
-    }
 }

@@ -1,16 +1,18 @@
 package com.example.api.mapper;
 
+import com.example.api.model.OpenMeteoData;
+import com.example.api.model.WeatherData;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
-
-import com.example.api.model.*;
-
 import java.util.stream.Collectors;
 
+@Component
 public class WeatherDataMapper {
 
-    public static List<WeatherData> mapOpenMeteoToWeatherData(OpenMeteoData data) {
+    public List<WeatherData> mapOpenMeteoToWeatherData(OpenMeteoData data, Long monthYearId) {
         return IntStream.range(0, data.getDaily().getTime().size())
                 .mapToObj(index -> {
                     WeatherData weatherData = new WeatherData();
@@ -19,12 +21,13 @@ public class WeatherDataMapper {
                     weatherData.setLowTemp(data.getDaily().getTemperature2mMin().get(index));
                     weatherData.setWeather(mapWeatherCode(data.getDaily().getWeathercode().get(index)));
                     weatherData.setWindSpeed(data.getDaily().getWindspeed10mMax().get(index));
+                    weatherData.setMonthsYearsId(monthYearId);
                     return weatherData;
                 })
                 .collect(Collectors.toList());
     }
 
-    private static WeatherData.Weather mapWeatherCode(int code) {
+    private WeatherData.Weather mapWeatherCode(int code) {
         switch (code) {
             case 0:
                 return WeatherData.Weather.CLEAR;

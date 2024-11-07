@@ -5,8 +5,9 @@ import com.example.api.model.*;
 import com.example.api.repository.MonthYearRepository;
 import com.example.api.repository.WeatherDataRepository;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,16 +21,16 @@ public class WeatherDataService {
 
     private final WeatherDataRepository weatherDataRepository;
     private final MonthYearRepository monthYearRepository;
-    private final WeatherDataFetcher weatherDataFetcher;
     private final WeatherDataMapper weatherDataMapper;
+    private final WeatherDataFetcher weatherDataFetcher;
 
     @Autowired
     public WeatherDataService(WeatherDataRepository weatherDataRepository, MonthYearRepository monthYearRepository,
-            WeatherDataFetcher weatherDataFetcher, WeatherDataMapper weatherDataMapper) {
+            WeatherDataMapper weatherDataMapper, WeatherDataFetcher weatherDataFetcher) {
         this.weatherDataRepository = weatherDataRepository;
         this.monthYearRepository = monthYearRepository;
-        this.weatherDataFetcher = weatherDataFetcher;
         this.weatherDataMapper = weatherDataMapper;
+        this.weatherDataFetcher = weatherDataFetcher;
     }
 
     public List<WeatherData> getWeatherDataForMonth(int year, int month) {
@@ -39,23 +40,28 @@ public class WeatherDataService {
 
         Optional<MonthYear> monthYearOptional = monthYearRepository.findByMonthAndYear(monthString, yearString);
 
+        logger.debug("monthYearOptional.isEmpty() {}", monthYearOptional.isEmpty());
+
         if (monthYearOptional.isEmpty()) {
-            logger.warn("No entry found in months_years table for month: {} and year: {}", monthString, yearString);
-            List<MonthYear> allMonthYears = monthYearRepository.findAll();
-            logger.info("Available entries in months_years table: {}", allMonthYears);
-            throw new RuntimeException("No data found for month " + monthString + " and year " + yearString
-                    + ". Available months and years: " + allMonthYears);
+            logger.info("HIT 1");
+            List<WeatherData> weatherDataList = createWeatherData(month, year, monthString, yearString);
+            return weatherDataList;
+        } else {
+            MonthYear monthYear = monthYearOptional.get();
+            logger.debug("monthYear() {}", monthYear);
+            logger.info("HIT 2");
+            List<WeatherData> weatherDataList = findWeatherData(monthYear.getId(), monthString, yearString);
+            return weatherDataList;
         }
+    }
 
-        MonthYear monthYear = monthYearOptional.get();
-        logger.info("Found MonthYear entry: {}", monthYear);
-
-        List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(monthYear.getId());
+    private List<WeatherData> findWeatherData(Long monthYear, String monthString, String yearString) {
+        List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(monthYear);
 
         if (weatherDataList.isEmpty()) {
-            logger.warn("No weather data found for MonthYear id: {}", monthYear.getId());
+            logger.warn("No weather data found for MonthYear id: {}", monthYear);
             throw new RuntimeException("No weather data found for month " + monthString + " and year " + yearString
-                    + " (MonthYear id: " + monthYear.getId() + ")");
+                    + " (MonthYear id: " + monthYear + ")");
         }
 
         logger.info("Found {} weather data entries", weatherDataList.size());
@@ -76,74 +82,36 @@ public class WeatherDataService {
     }
 
     @Transactional
-    public WeatherData saveWeatherData(int year, int month, OpenMeteoData data) {
-        String monthString = String.format("%02d", month);
-        String yearString = String.valueOf(year);
-        Long monthYearId = null;
-        WeatherData weatherData = null;
+    public List<WeatherData> createWeatherData(int month, int year, String monthString, String yearString) {
+        logger.info("Creating weather data for month: {} and year: {}", monthString, yearString);
 
-        logger.info("Searching for weather data for month: {} and year: {}", monthString, yearString);
-
-        Optional<MonthYear> monthYearOptional = monthYearRepository.findByMonthAndYear(monthString, yearString);
-
-        if (monthYearOptional.isEmpty()) {
-            logger.warn("No entry found in months_years table for month: {} and year: {}", monthString, yearString);
-            logger.info("Creating new entry in months_years table for month: {} and year: {}", monthString, yearString);
-
-            // Create a new months_years entry
-            Optional<MonthYear> createMonthYear = monthYearRepository.createMonthYear(monthString, yearString);
-
-            MonthYear newMonthYear = createMonthYear.get();
-
-            monthYearId = newMonthYear.getId();
-
+        // Create a new months_years entry
+        Optional<MonthYear> createMonthYear = monthYearRepository.createMonthYear(monthString, yearString);
+        if (createMonthYear.isEmpty()) {
+            throw new RuntimeException("Failed to create MonthYear entry");
         }
 
-        if (monthYearId != null) {
-            logger.info("Finding weather data based on montYearId...");
-            List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(monthYearId);
-            logger.info("Found {} weather data entries from monthYearId", weatherDataList.size());
+        MonthYear newMonthYear = createMonthYear.get();
+        Long monthYearId = newMonthYear.getId();
 
-            for (WeatherData d : weatherDataList) {
-                logger.debug(
-                        "Weather data - ID: {}, Date: {}, High Temp: {}, Low Temp: {}, Weather: {}, Wind Speed: {}, Months Years ID: {}",
-                        d.getId(),
-                        d.getDate(),
-                        d.getHighTemp(),
-                        d.getLowTemp(),
-                        d.getWeather(),
-                        d.getWindSpeed(),
-                        d.getMonthsYearsId());
-            }
-            // Add functionality to fetch data from open meteor api here
-            // CompletableFuture<OpenMeteoData> fetchWeatherData =
-            // weatherDataFetcher.fetchWeatherData(month, year);
-            // logger.info("fetchWeatherData {}", fetchWeatherData);
+        logger.info("Created MonthYear entry with ID: {}", monthYearId);
 
-            // weatherData = weatherDataRepository.createWeatherData(
-            // fetchWeatherData,
-            // monthYearId);
+        try {
+            CompletableFuture<OpenMeteoData> fetchWeatherData = weatherDataFetcher.fetchWeatherData(month, year);
+            OpenMeteoData openMeteoData = fetchWeatherData.get();
+            List<WeatherData> openMeteoToWeatherData = weatherDataMapper.mapOpenMeteoToWeatherData(openMeteoData,
+                    monthYearId);
 
-            if (weatherData == null) {
-                logger.error("Could not created weather data entries");
-            }
+            logger.info("Mapped {} weather data entries", openMeteoToWeatherData.size());
 
-            // else {
-            // logger.info("Created weather data entries");
-            // logger.debug(
-            // "Weather data - ID: {}, Date: {}, High Temp: {}, Low Temp: {}, Weather: {},
-            // Wind Speed: {}, Months Years ID: {}",
-            // weatherData.getId(),
-            // weatherData.getDate(),
-            // weatherData.getHighTemp(),
-            // weatherData.getLowTemp(),
-            // weatherData.getWeather(),
-            // weatherData.getWindSpeed(),
-            // weatherData.getMonthsYearsId());
-            // }
+            List<WeatherData> savedWeatherData = weatherDataRepository.saveAll(openMeteoToWeatherData);
 
+            logger.info("Successfully saved {} weather data entries", savedWeatherData.size());
+            return savedWeatherData;
+
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error while fetching or saving weather data", e);
+            throw new RuntimeException("Failed to fetch or save weather data", e);
         }
-
-        return weatherData;
     }
 }

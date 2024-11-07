@@ -1,7 +1,6 @@
 package com.example.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class OpenMeteoData {

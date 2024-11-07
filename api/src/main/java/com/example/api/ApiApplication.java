@@ -10,15 +10,15 @@ import java.sql.Connection;
 @SpringBootApplication
 public class ApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ApiApplication.class, args);
-	}
-	
-	@Bean
+    public static void main(String[] args) {
+        SpringApplication.run(ApiApplication.class, args);
+    }
+
+    @Bean
     public CommandLineRunner testConnection(DataSource dataSource) {
         return args -> {
             Connection connection = dataSource.getConnection();
-            
+
             try (connection) {
                 System.out.println("Database connected successfully!");
             } catch (Exception e) {
