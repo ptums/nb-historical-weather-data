@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-
 @Service
 public class WeatherDataService {
 
@@ -87,7 +85,7 @@ public class WeatherDataService {
             logger.info("Creating new entry in months_years table for month: {} and year: {}", monthString, yearString);
 
             // Create a new months_years entry
-            Optional<MonthYear> createMonthYear = monthYearRepository.saveMonthAndYear(monthString, yearString);
+            Optional<MonthYear> createMonthYear = monthYearRepository.createMonthYear(monthString, yearString);
 
             MonthYear newMonthYear = createMonthYear.get();
 
@@ -97,14 +95,13 @@ public class WeatherDataService {
 
         if (monthYearId != null) {
             logger.info("Creating a new weather entry with the new month year id...");
-            weatherData = weatherDataRepository.saveWeatherData(
-                data.getDate(),
-                data.getHighTemp(),
-                data.getLowTemp(),
-                data.getWeather(),
-                data.getWindSpeed(),
-                monthYearId
-        );
+            weatherData = weatherDataRepository.createWeatherData(
+                    data.getDate(),
+                    data.getHighTemp(),
+                    data.getLowTemp(),
+                    data.getWeather(),
+                    data.getWindSpeed(),
+                    monthYearId);
 
             if (weatherData == null) {
                 logger.error("Could not created weather data entries");
