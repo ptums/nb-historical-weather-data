@@ -81,6 +81,8 @@ export function WeatherTable() {
     staleTime: Infinity, // You might want to adjust this based on how often you need fresh data
   });
 
+  console.log(data);
+
   const weatherData = useMemo(() => {
     if (DUMMIE_DATA_FLAG) {
       return dummieData;

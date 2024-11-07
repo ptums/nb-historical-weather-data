@@ -1,12 +1,13 @@
 package com.example.api.service;
 
-import com.example.api.model.MonthYear;
-import com.example.api.model.WeatherData;
+import com.example.api.mapper.WeatherDataMapper;
+import com.example.api.model.*;
 import com.example.api.repository.MonthYearRepository;
 import com.example.api.repository.WeatherDataRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,16 @@ public class WeatherDataService {
 
     private final WeatherDataRepository weatherDataRepository;
     private final MonthYearRepository monthYearRepository;
+    private final WeatherDataFetcher weatherDataFetcher;
+    private final WeatherDataMapper weatherDataMapper;
 
     @Autowired
-    public WeatherDataService(WeatherDataRepository weatherDataRepository, MonthYearRepository monthYearRepository) {
+    public WeatherDataService(WeatherDataRepository weatherDataRepository, MonthYearRepository monthYearRepository,
+            WeatherDataFetcher weatherDataFetcher, WeatherDataMapper weatherDataMapper) {
         this.weatherDataRepository = weatherDataRepository;
         this.monthYearRepository = monthYearRepository;
+        this.weatherDataFetcher = weatherDataFetcher;
+        this.weatherDataMapper = weatherDataMapper;
     }
 
     public List<WeatherData> getWeatherDataForMonth(int year, int month) {
@@ -70,7 +76,7 @@ public class WeatherDataService {
     }
 
     @Transactional
-    public WeatherData saveWeatherData(int year, int month, WeatherData data) {
+    public WeatherData saveWeatherData(int year, int month, OpenMeteoData data) {
         String monthString = String.format("%02d", month);
         String yearString = String.valueOf(year);
         Long monthYearId = null;
@@ -94,29 +100,47 @@ public class WeatherDataService {
         }
 
         if (monthYearId != null) {
-            logger.info("Creating a new weather entry with the new month year id...");
-            weatherData = weatherDataRepository.createWeatherData(
-                    data.getDate(),
-                    data.getHighTemp(),
-                    data.getLowTemp(),
-                    data.getWeather(),
-                    data.getWindSpeed(),
-                    monthYearId);
+            logger.info("Finding weather data based on montYearId...");
+            List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(monthYearId);
+            logger.info("Found {} weather data entries from monthYearId", weatherDataList.size());
+
+            for (WeatherData d : weatherDataList) {
+                logger.debug(
+                        "Weather data - ID: {}, Date: {}, High Temp: {}, Low Temp: {}, Weather: {}, Wind Speed: {}, Months Years ID: {}",
+                        d.getId(),
+                        d.getDate(),
+                        d.getHighTemp(),
+                        d.getLowTemp(),
+                        d.getWeather(),
+                        d.getWindSpeed(),
+                        d.getMonthsYearsId());
+            }
+            // Add functionality to fetch data from open meteor api here
+            // CompletableFuture<OpenMeteoData> fetchWeatherData =
+            // weatherDataFetcher.fetchWeatherData(month, year);
+            // logger.info("fetchWeatherData {}", fetchWeatherData);
+
+            // weatherData = weatherDataRepository.createWeatherData(
+            // fetchWeatherData,
+            // monthYearId);
 
             if (weatherData == null) {
                 logger.error("Could not created weather data entries");
-            } else {
-                logger.info("Created weather data entries");
-                logger.debug(
-                        "Weather data - ID: {}, Date: {}, High Temp: {}, Low Temp: {}, Weather: {}, Wind Speed: {}, Months Years ID: {}",
-                        weatherData.getId(),
-                        weatherData.getDate(),
-                        weatherData.getHighTemp(),
-                        weatherData.getLowTemp(),
-                        weatherData.getWeather(),
-                        weatherData.getWindSpeed(),
-                        weatherData.getMonthsYearsId());
             }
+
+            // else {
+            // logger.info("Created weather data entries");
+            // logger.debug(
+            // "Weather data - ID: {}, Date: {}, High Temp: {}, Low Temp: {}, Weather: {},
+            // Wind Speed: {}, Months Years ID: {}",
+            // weatherData.getId(),
+            // weatherData.getDate(),
+            // weatherData.getHighTemp(),
+            // weatherData.getLowTemp(),
+            // weatherData.getWeather(),
+            // weatherData.getWindSpeed(),
+            // weatherData.getMonthsYearsId());
+            // }
 
         }
 

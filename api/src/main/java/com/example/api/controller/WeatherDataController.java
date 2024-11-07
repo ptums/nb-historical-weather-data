@@ -1,9 +1,11 @@
 package com.example.api.controller;
 
-import com.example.api.model.WeatherData;
+import com.example.api.model.*;
 import com.example.api.service.WeatherDataService;
 import java.time.Duration;
 import java.util.List;
+
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -11,12 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-
 @RestController
 @RequestMapping("/api/weather")
 public class WeatherDataController {
 
     private final WeatherDataService weatherDataService;
+    private static final Logger logger = LoggerFactory.getLogger(WeatherDataService.class);
 
     @Autowired
     public WeatherDataController(WeatherDataService weatherDataService) {
@@ -41,17 +43,18 @@ public class WeatherDataController {
             @PathVariable @DateTimeFormat(pattern = "MM") int month) {
         List<WeatherData> monthlyData = weatherDataService.getWeatherDataForMonth(year, month);
         return Flux.fromIterable(monthlyData)
-                   .delayElements(Duration.ofMillis(100)); // Delay each element by 100ms for demonstration
+                .delayElements(Duration.ofMillis(100)); // Delay each element by 100ms for demonstration
     }
 
-   @PostMapping(value = "/monthly/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/monthly/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> postMonthlyWeatherData(
             @PathVariable int year,
             @PathVariable int month,
-            @RequestBody WeatherData weatherData) {
+            @RequestBody OpenMeteoData weatherData) {
         try {
+            logger.info("year {}, month {}", year, month);
             // Validate the incoming data
-            if (!isValidWeatherData(year, month, weatherData)) {
+            if (!isValidWeatherData(year, month)) {
                 return ResponseEntity.badRequest().body("Invalid weather data");
             }
 
@@ -64,11 +67,7 @@ public class WeatherDataController {
         }
     }
 
-    private boolean isValidWeatherData(int year, int month, WeatherData data) {
-        return (data != null && year > 0 && month > 0) &&
-               month > 0 && month <= 12 &&
-               year > 0 &&
-               data.getWeather() != null &&
-               List.of("clear", "mainlyClear", "partlyCloudy", "overcast", "fog", "drizzle", "rain", "snow", "rainShowers", "snowShowers", "thunderstorm", "unknown").contains(data.getWeather());
+    private boolean isValidWeatherData(int year, int month) {
+        return month > 0 && month <= 12 && year > 0;
     }
 }

@@ -12,16 +12,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> {
-    @Query("SELECT w FROM WeatherData w WHERE w.monthsYearsId = :monthsYearsId")
-    List<WeatherData> findByMonthsYearsId(@Param("monthsYearsId") Long monthsYearsId);
+        @Query("SELECT w FROM WeatherData w WHERE w.monthsYearsId = :monthsYearsId")
+        List<WeatherData> findByMonthsYearsId(@Param("monthsYearsId") Long monthsYearsId);
 
-    @Query(value = "INSERT INTO weather_data (date, high_temp, low_temp, weather, wind_speed, months_years_id) " +
-            "VALUES (:date, :highTemp, :lowTemp, :weather, :windSpeed, :monthsYearsId) " +
-            "RETURNING *", nativeQuery = true)
-    WeatherData createWeatherData(@Param("date") LocalDate date,
-            @Param("highTemp") double highTemp,
-            @Param("lowTemp") double lowTemp,
-            @Param("weather") Weather weather,
-            @Param("windSpeed") double windSpeed,
-            @Param("monthsYearsId") Long monthsYearsId);
+        @Query(value = "INSERT INTO weather_data (date, high_temp, low_temp, weather, wind_speed, months_years_id) " +
+                        "VALUES (:date, :highTemp, :lowTemp, :weather, :windSpeed, :monthsYearsId) " +
+                        "RETURNING *", nativeQuery = true)
+        WeatherData createWeatherData(@Param("date") LocalDate date,
+                        @Param("highTemp") double highTemp,
+                        @Param("lowTemp") double lowTemp,
+                        @Param("weather") Weather weather,
+                        @Param("windSpeed") double windSpeed,
+                        @Param("monthsYearsId") Long monthsYearsId);
+
+        WeatherData createWeatherData(List<WeatherData> mapOpenMeteoToWeatherData, Long monthYearId);
 }
