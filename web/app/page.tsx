@@ -13,7 +13,7 @@ import {
 } from "./context/toggle-fetch-context";
 import classNames from "classnames";
 import KeyListener from "./key-listener";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useId } from "react";
 import { Sidebar } from "./ui/displays/sidebar";
 import ToggleFetchToggle from "./ui/toggle-fetch";
 import {
@@ -34,6 +34,7 @@ const Page = () => {
   const { isToggleFetch, setIsToggleFetch } = useToggleFetch();
   const [shouldFetch, setShouldFetch] = useState(false);
   const { setWeatherData } = useWeatherData();
+  const [userId, setUserId] = useState("");
 
   // Sync display toggle fetch
   const syncDisplayToggleFetch = useCallback(() => {
@@ -96,6 +97,22 @@ const Page = () => {
   // Dummie items
   const historyItems = useMemo(() => dummieItems(), []);
   const comparisonItems = useMemo(() => dummieItems(), []);
+
+  // set user id
+  const randomId = useId();
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("user_id");
+
+    if (!storedUserId) {
+      localStorage.setItem("user_id", randomId);
+      setUserId(randomId);
+      console.log("New user_id set in localStorage:", randomId);
+    } else {
+      setUserId(storedUserId);
+      console.log("Existing user_id found in localStorage:", storedUserId);
+    }
+  }, [randomId]);
 
   return (
     <>
