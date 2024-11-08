@@ -1,5 +1,6 @@
 "use client";
 
+import { defaultMonth, defaultYear } from "@/lib/utils";
 import React, { createContext, useState, useContext, ReactNode } from "react";
 
 type YearMonthContextType = {
@@ -22,8 +23,8 @@ interface YearMonthProviderProps {
 export const YearMonthProvider: React.FC<YearMonthProviderProps> = ({
   children,
 }) => {
-  const [month, setMonth] = useState<string>("01");
-  const [year, setYear] = useState<number>(1950);
+  const [month, setMonth] = useState<string>(defaultMonth);
+  const [year, setYear] = useState<number>(defaultYear);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   return (

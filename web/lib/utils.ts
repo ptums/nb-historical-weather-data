@@ -103,3 +103,8 @@ export const storeInIndexedDB = async (data: WeatherData[]): Promise<void> => {
     };
   });
 };
+
+const currentDate = new Date();
+const currentMonth = currentDate.getMonth();
+export const defaultYear = currentDate.getFullYear();
+export const defaultMonth = (currentMonth + 1).toString();

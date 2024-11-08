@@ -1,12 +1,7 @@
 # New Brunswick, NJ Historical Weather Data
 
-## To DO
-
-- Fix POST request in API
-
 ## MVP
 
-- Default to todays date and store the latest month in indexDB if its already been grabbed
 - Sidebar of searched dates store in indexDB labeled "History"
 - Deploy backend
 

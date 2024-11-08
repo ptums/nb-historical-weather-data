@@ -9,7 +9,7 @@ import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { fetchMonthWeatherData } from "@/lib/utils";
+import { defaultMonth, defaultYear, fetchMonthWeatherData } from "@/lib/utils";
 import { useWeatherData } from "@/app/context/weather-data-context";
 import { WeatherData } from "@/lib/types";
 
@@ -50,8 +50,8 @@ export function YearMonthForm() {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      month: "01",
-      year: 1950,
+      month: defaultMonth,
+      year: defaultYear,
     },
   });
 
