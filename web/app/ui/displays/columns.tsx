@@ -10,6 +10,7 @@ import {
   CloudLightning,
   CloudFog,
   Wind,
+  FileQuestion,
 } from "lucide-react";
 
 const columnHelper = createColumnHelper<WeatherData>();
@@ -43,30 +44,30 @@ export const columns = [
     cell: (info) => {
       const weather = info.getValue();
       switch (weather) {
-        case "clear":
+        case "CLEAR":
           return <Sun className="text-yellow-400" />;
-        case "mainlyClear":
+        case "MAINLY_CLEAR":
           return <Sun className="text-yellow-400" />;
-        case "partlyCloudy":
+        case "PARTLY_CLOUDY":
           return <CloudSun className="text-gray-400" />;
-        case "overcast":
+        case "OVERCAST":
           return <Cloud className="text-gray-400" />;
-        case "fog":
+        case "FOG":
           return <CloudFog className="text-gray-400" />;
-        case "drizzle":
+        case "DRIZZLE":
           return <Droplets className="text-blue-300" />;
-        case "rain":
+        case "RAIN":
           return <CloudRain className="text-blue-400" />;
-        case "snow":
+        case "SNOW":
           return <Snowflake className="text-blue-200" />;
-        case "rainShowers":
+        case "RAIN_SHOWERS":
           return <CloudRain className="text-blue-500" />;
-        case "snowShowers":
+        case "SNOW_SHOWERS":
           return <Snowflake className="text-blue-300" />;
-        case "thunderstorm":
+        case "THUNDERSTORM":
           return <CloudLightning className="text-yellow-500" />;
-        case "unknown":
-          return <Cloud className="text-gray-300" />;
+        case "UNKNOWN":
+          return <FileQuestion className="text-gray-300" />;
         default:
           return null;
       }

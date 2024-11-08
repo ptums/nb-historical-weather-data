@@ -7,88 +7,40 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { WeatherData } from "@/lib/types";
 import { useYearMonth } from "@/app/context/year-month-context";
-import { getMonthName, mapWeatherCode } from "@/lib/utils";
+import { getMonthName } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { DUMMIE_DATA_FLAG, LOCATION } from "@/lib/constants";
+import { DUMMIE_DATA_FLAG } from "@/lib/constants";
 import { dummieData } from "@/lib/dummie-data";
 import { columns } from "./columns";
 
-const fetchWeatherData = async (
-  lat: number,
-  long: number,
-  month: number,
-  year: number
-) => {
-  const startDate = `${year}-${month.toString().padStart(2, "0")}-01`;
-  const endDate = `${year}-${month.toString().padStart(2, "0")}-${new Date(
-    year,
-    month,
-    0
-  ).getDate()}`;
-
-  const response = await fetch(
-    `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${long}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,weathercode,windspeed_10m_max&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`
-  );
+const fetchWeatherData = async (month: number, year: number) => {
+  const url = `http://localhost:8080/api/weather/monthly/${year}/${month}`;
+  const response = await fetch(url);
   const data = await response.json();
 
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
 
-  return data;
-};
-
-const mapOpenMeteoToWeatherData = (data: {
-  daily: {
-    time: {
-      map: (
-        arg0: (
-          date: string,
-          index: number
-        ) => {
-          date: number;
-          highTemp: number;
-          lowTemp: number;
-          weather: WeatherData["weather"];
-          windSpeed: number;
-        }
-      ) => WeatherData[];
-    };
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
-    weathercode: number[];
-    windspeed_10m_max: number[];
-  };
-}): WeatherData[] => {
-  return data.daily.time.map((date: string, index: number) => ({
-    date: new Date(date).getDate(),
-    highTemp: Math.round(data.daily.temperature_2m_max[index]),
-    lowTemp: Math.round(data.daily.temperature_2m_min[index]),
-    weather: mapWeatherCode(data.daily.weathercode[index]),
-    windSpeed: Math.round(data.daily.windspeed_10m_max[index]),
-  }));
+  return [...data];
 };
 
 export function WeatherTable() {
   const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
   const { data, isLoading, error } = useQuery({
     queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
-    queryFn: () =>
-      fetchWeatherData(LOCATION.lat, LOCATION.long, parseInt(month), year),
+    queryFn: () => fetchWeatherData(parseInt(month), year),
     enabled: isSubmitted && !DUMMIE_DATA_FLAG, // This will only enable the query when isSubmitted is true
     staleTime: Infinity, // You might want to adjust this based on how often you need fresh data
   });
-
-  console.log(data);
 
   const weatherData = useMemo(() => {
     if (DUMMIE_DATA_FLAG) {
       return dummieData;
     }
 
-    return data ? mapOpenMeteoToWeatherData(data) : [];
+    return data ? data : [];
   }, [data]);
 
   const table = useReactTable({

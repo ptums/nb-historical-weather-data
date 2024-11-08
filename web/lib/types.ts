@@ -3,17 +3,18 @@ export type WeatherData = {
   highTemp: number;
   lowTemp: number;
   weather:
-    | "clear"
-    | "mainlyClear"
-    | "partlyCloudy"
-    | "overcast"
-    | "fog"
-    | "drizzle"
-    | "rain"
-    | "snow"
-    | "rainShowers"
-    | "snowShowers"
-    | "thunderstorm"
-    | "unknown";
+    | "CLEAR"
+    | "MAINLY_CLEAR"
+    | "PARTLY_CLOUDY"
+    | "OVERCAST"
+    | "FOG"
+    | "RAIN"
+    | "DRIZZLE"
+    | "SNOW"
+    | "RAIN_SHOWERS"
+    | "SNOW_SHOWERS"
+    | "THUNDERSTORM"
+    | "SUNNY"
+    | "UNKNOWN";
   windSpeed: number;
 };
