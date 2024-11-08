@@ -26,7 +26,7 @@ const fetchWeatherData = async (month: number, year: number) => {
   return [...data];
 };
 
-export function WeatherTable() {
+export const WeatherTable = () => {
   const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
   const { isToggleFetch } = useToggleFetch();
   const { data, isLoading, error } = useQuery({
@@ -109,4 +109,4 @@ export function WeatherTable() {
       </table>
     </div>
   );
-}
+};

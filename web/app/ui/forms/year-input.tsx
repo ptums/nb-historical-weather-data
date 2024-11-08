@@ -26,6 +26,7 @@ export const YearInput: React.FC<YearInputProps> = ({
       min={min}
       max={max}
       placeholder="Enter Year"
+      className="bg-white"
       onBlur={() => {
         if (value.toString() === "") {
           onChange(min);

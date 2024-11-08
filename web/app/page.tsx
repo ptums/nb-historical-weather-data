@@ -1,6 +1,6 @@
 "use client";
 
-import { WeatherTable, YearMonthForm } from "./ui";
+import { SiteTitle, WeatherTable, YearMonthForm } from "./ui";
 import { YearMonthProvider } from "./context/year-month-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -9,7 +9,9 @@ import {
 } from "./context/toggle-fetch-context";
 import classNames from "classnames";
 import KeyListener from "./key-listener";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { Sidebar } from "./ui/displays/sidebar";
+import ToggleFetchToggle from "./ui/toggle-fetch";
 
 const queryClient = new QueryClient();
 
@@ -46,21 +48,46 @@ const Page = () => {
     };
   }, [syncDisplayToggleFetch]);
 
+  const historyItems = useMemo(() => {
+    const items = [];
+    for (let i = 0; i < 5; i++) {
+      const year = Math.floor(Math.random() * (2024 - 1940 + 1)) + 1940;
+      const month = Math.floor(Math.random() * 12) + 1;
+      items.push({ year, month });
+    }
+    return items;
+  }, []);
+
+  const comparisonItems = useMemo(() => {
+    const items = [];
+    for (let i = 0; i < 5; i++) {
+      const year = Math.floor(Math.random() * (2024 - 1940 + 1)) + 1940;
+      const month = Math.floor(Math.random() * 12) + 1;
+      items.push({ year, month });
+    }
+    return items;
+  }, []);
+
   return (
     <>
       <KeyListener />
+      <ToggleFetchToggle />
       <main
-        className={classNames(
-          "flex min-h-screen flex-col items-center justify-center p-24",
-          {
-            "bg-yellow-50": !isToggleFetch,
-            "bg-gray-100": isToggleFetch,
-          }
-        )}
+        className={classNames("flex min-h-screen", {
+          "bg-yellow-50": !isToggleFetch,
+          "bg-gray-100": isToggleFetch,
+        })}
       >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Sidebar title="History" items={historyItems} />
+        <Sidebar
+          title="Comparison"
+          items={comparisonItems}
+          displayShadow={true}
+        />
+        <div className="flex flex-col items-center justify-center w-full py-8">
+          <SiteTitle />
           <YearMonthForm />
-          <div className="min-h-dvh">
+          <div className="min-h-screen w-full sm:w-3/4">
             <WeatherTable />
           </div>
         </div>

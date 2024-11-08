@@ -22,7 +22,7 @@ export const MonthPicker: React.FC<MonthPickerProps> = ({
 
   return (
     <Select value={stringValue} onValueChange={onChange}>
-      <SelectTrigger className="w-full h-[42px] border-2 border-black rounded-xl bg-white">
+      <SelectTrigger className="w-full rounded bg-white">
         <SelectValue placeholder="Enter Month" />
       </SelectTrigger>
       <SelectContent>

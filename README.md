@@ -8,8 +8,6 @@ See about:
 - Sidebar of searched dates store in indexDB labeled "History"
 - Deploy backend
 
-## V1
-
 ### Comparison Mode
 
 #### UI:

@@ -8,9 +8,6 @@ import { MonthPicker } from "./month-picker";
 import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
-import { SiteTitle } from "../site-title";
-import classNames from "classnames";
-import { useToggleFetch } from "@/app/context/toggle-fetch-context";
 
 const schema = yup.object().shape({
   month: yup
@@ -42,7 +39,6 @@ type FormData = yup.InferType<typeof schema>;
 export function YearMonthForm() {
   const { month, setMonth, year, setYear, setIsSubmitted, isSubmitted } =
     useYearMonth();
-  const { isToggleFetch } = useToggleFetch();
   const {
     handleSubmit,
     formState: { errors },
@@ -65,55 +61,44 @@ export function YearMonthForm() {
   };
 
   return (
-    <>
-      <SiteTitle />
-      <div
-        className={classNames("rounded-3xl p-8 shadow-lg", {
-          "bg-white": !isToggleFetch,
-          "bg-yellow-50": isToggleFetch,
-        })}
+    <div className="w-full sm:w-3/4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col sm:flex-row items-center gap-4"
       >
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col sm:flex-row items-center gap-4"
-        >
-          <div className="w-full sm:w-1/3">
-            <MonthPicker
-              value={month}
-              onChange={(value) => {
-                setMonth(value);
-                setValue("month", value, { shouldValidate: true });
-              }}
-            />
-            {errors.month && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.month.message}
-              </p>
-            )}
-          </div>
-          <div className="w-full sm:w-1/3">
-            <YearInput
-              value={year}
-              onChange={(value) => {
-                setYear(value);
-                setValue("year", value, { shouldValidate: true });
-              }}
-              min={1850}
-              max={new Date().getFullYear()}
-            />
-            {errors.year && (
-              <p className="text-red-500 text-sm mt-1">{errors.year.message}</p>
-            )}
-          </div>
-          <Button
-            type="submit"
-            disabled={isSubmitted}
-            className="w-full sm:w-1/4 bg-green-400 hover:bg-green-500 text-black rounded-xl px-8 py-2 h-[42px]"
-          >
-            Go
-          </Button>
-        </form>
-      </div>
-    </>
+        <div className="w-full sm:w-44">
+          <MonthPicker
+            value={month}
+            onChange={(value) => {
+              setMonth(value);
+              setValue("month", value, { shouldValidate: true });
+            }}
+          />
+          {errors.month && (
+            <p className="text-red-500 text-sm mt-1">{errors.month.message}</p>
+          )}
+        </div>
+        <div className="w-full sm:w-32">
+          <YearInput
+            value={year}
+            onChange={(value) => {
+              setYear(value);
+              setValue("year", value, { shouldValidate: true });
+            }}
+            min={1850}
+            max={new Date().getFullYear()}
+          />
+          {errors.year && (
+            <p className="text-red-500 text-sm mt-1">{errors.year.message}</p>
+          )}
+        </div>
+        <Button disabled={true} variant="compare">
+          Compare
+        </Button>
+        <Button type="submit" disabled={isSubmitted} variant="go">
+          Go
+        </Button>
+      </form>
+    </div>
   );
 }
