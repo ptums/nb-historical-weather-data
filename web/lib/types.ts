@@ -18,3 +18,10 @@ export type WeatherData = {
     | "UNKNOWN";
   windSpeed: number;
 };
+
+export type MonthYear = {
+  month: number;
+  year: number;
+};
+
+export type PayloadTypes = MonthYear;

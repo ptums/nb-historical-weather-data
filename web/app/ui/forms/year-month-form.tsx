@@ -9,9 +9,10 @@ import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { defaultMonth, defaultYear, fetchMonthWeatherData } from "@/lib/utils";
+import { defaultMonth, defaultYear } from "@/lib/utils";
 import { useWeatherData } from "@/app/context/weather-data-context";
 import { WeatherData } from "@/lib/types";
+import { fetchMonthWeatherData } from "@/lib/api";
 
 const schema = yup.object().shape({
   month: yup

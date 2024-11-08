@@ -1,7 +1,7 @@
 "use client";
 
 import { SiteTitle, WeatherTable, YearMonthForm } from "./ui";
-import { YearMonthProvider } from "./context/year-month-context";
+import { useYearMonth, YearMonthProvider } from "./context/year-month-context";
 import {
   QueryClient,
   QueryClientProvider,
@@ -21,13 +21,13 @@ import {
   WeatherDataProvider,
 } from "./context/weather-data-context";
 import { dummieItems } from "@/lib/dummie-data";
-import { WeatherData } from "@/lib/types";
+import { MonthYear, WeatherData } from "@/lib/types";
 import {
   checkIndexedDB,
   currentDateMilliseconds,
-  fetchTodayWeatherData,
   storeInIndexedDB,
 } from "@/lib/utils";
+import { fetchMonthsYearsData, fetchTodayWeatherData } from "@/lib/api";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +36,7 @@ const Page = () => {
   const [shouldFetch, setShouldFetch] = useState(false);
   const { setWeatherData } = useWeatherData();
   const [userId, setUserId] = useState("");
+  const { month, year } = useYearMonth();
 
   // Sync display toggle fetch
   const syncDisplayToggleFetch = useCallback(() => {
@@ -83,19 +84,25 @@ const Page = () => {
     checkData();
   }, []);
 
-  const { data } = useQuery<WeatherData[], Error>({
+  const { data: todaysWeather } = useQuery<WeatherData[], Error>({
     queryKey: ["weatherData"],
     queryFn: fetchTodayWeatherData,
     enabled: shouldFetch,
   });
 
+  const { data: monthYears } = useQuery<MonthYear[], Error>({
+    queryKey: ["monthYears"],
+    queryFn: () => fetchMonthsYearsData(parseInt(month), year),
+    enabled: userId !== "" && month !== "" && year > 0,
+  });
+
   useEffect(() => {
-    if (data) {
-      storeInIndexedDB(data);
-      setWeatherData(data);
+    if (todaysWeather) {
+      storeInIndexedDB(todaysWeather);
+      setWeatherData(todaysWeather);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [todaysWeather]);
 
   // Dummie items
   const historyItems = useMemo(() => dummieItems(), []);
@@ -116,6 +123,15 @@ const Page = () => {
       console.log("Existing user_id found in localStorage:", storedUserId);
     }
   }, [randomId]);
+
+  // Get sidebar history & comparison based on userID
+
+  useEffect(() => {
+    if (userId) {
+      console.log("get sidebar data");
+      console.log(monthYears);
+    }
+  }, [userId, monthYears]);
 
   return (
     <>

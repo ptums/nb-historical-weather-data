@@ -33,40 +33,6 @@ export function getMonthName(monthNumber: number): string {
   return months[index];
 }
 
-export async function fetchMonthWeatherData(month: number, year: number) {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/month`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ month, year }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  return [...data];
-}
-
-export async function fetchTodayWeatherData() {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/today`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  return [...data];
-}
-
 // Function to check IndexedDB for existing data
 export const checkIndexedDB = async (): Promise<{
   weatherData: WeatherData[] | null;

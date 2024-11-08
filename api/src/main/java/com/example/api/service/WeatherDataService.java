@@ -2,7 +2,7 @@ package com.example.api.service;
 
 import com.example.api.mapper.WeatherDataMapper;
 import com.example.api.model.*;
-import com.example.api.repository.MonthYearRepository;
+import com.example.api.repository.MonthsYearsRepository;
 import com.example.api.repository.WeatherDataRepository;
 import jakarta.transaction.Transactional;
 
@@ -20,15 +20,15 @@ public class WeatherDataService {
     private static final Logger logger = LoggerFactory.getLogger(WeatherDataService.class);
 
     private final WeatherDataRepository weatherDataRepository;
-    private final MonthYearRepository monthYearRepository;
+    private final MonthsYearsRepository monthsYearsRepository;
     private final WeatherDataMapper weatherDataMapper;
     private final WeatherDataFetcher weatherDataFetcher;
 
     @Autowired
-    public WeatherDataService(WeatherDataRepository weatherDataRepository, MonthYearRepository monthYearRepository,
+    public WeatherDataService(WeatherDataRepository weatherDataRepository, MonthsYearsRepository monthsYearsRepository,
             WeatherDataMapper weatherDataMapper, WeatherDataFetcher weatherDataFetcher) {
         this.weatherDataRepository = weatherDataRepository;
-        this.monthYearRepository = monthYearRepository;
+        this.monthsYearsRepository = monthsYearsRepository;
         this.weatherDataMapper = weatherDataMapper;
         this.weatherDataFetcher = weatherDataFetcher;
     }
@@ -38,28 +38,28 @@ public class WeatherDataService {
         String yearString = String.valueOf(year);
         logger.info("Searching for weather data for month: {} and year: {}", monthString, yearString);
 
-        Optional<MonthYear> monthYearOptional = monthYearRepository.findByMonthAndYear(monthString, yearString);
+        Optional<MonthsYears> MonthsYearsOptional = monthsYearsRepository.findByMonthAndYear(monthString, yearString);
 
-        logger.debug("monthYearOptional.isEmpty() {}", monthYearOptional.isEmpty());
+        logger.debug("MonthsYearsOptional.isEmpty() {}", MonthsYearsOptional.isEmpty());
 
-        if (monthYearOptional.isEmpty()) {
+        if (MonthsYearsOptional.isEmpty()) {
             List<WeatherData> weatherDataList = createWeatherData(month, year, monthString, yearString, source);
             return weatherDataList;
         } else {
-            MonthYear monthYear = monthYearOptional.get();
-            logger.debug("monthYear() {}", monthYear);
-            List<WeatherData> weatherDataList = findWeatherData(monthYear.getId(), monthString, yearString);
+            MonthsYears MonthsYears = MonthsYearsOptional.get();
+            logger.debug("MonthsYears() {}", MonthsYears);
+            List<WeatherData> weatherDataList = findWeatherData(MonthsYears.getId(), monthString, yearString);
             return weatherDataList;
         }
     }
 
-    private List<WeatherData> findWeatherData(Long monthYear, String monthString, String yearString) {
-        List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(monthYear);
+    private List<WeatherData> findWeatherData(Long MonthsYears, String monthString, String yearString) {
+        List<WeatherData> weatherDataList = weatherDataRepository.findByMonthsYearsId(MonthsYears);
 
         if (weatherDataList.isEmpty()) {
-            logger.warn("No weather data found for MonthYear id: {}", monthYear);
+            logger.warn("No weather data found for MonthsYears id: {}", MonthsYears);
             throw new RuntimeException("No weather data found for month " + monthString + " and year " + yearString
-                    + " (MonthYear id: " + monthYear + ")");
+                    + " (MonthsYears id: " + MonthsYears + ")");
         }
 
         logger.info("Found {} weather data entries", weatherDataList.size());
@@ -84,23 +84,20 @@ public class WeatherDataService {
             String source) {
         logger.info("Creating weather data for month: {} and year: {}", monthString, yearString);
 
-        // Create a new months_years entry
-        Optional<MonthYear> createMonthYear = monthYearRepository.createMonthYear(monthString, yearString);
-        if (createMonthYear.isEmpty()) {
-            throw new RuntimeException("Failed to create MonthYear entry");
-        }
+        MonthsYears monthsYearsEntry = new MonthsYears();
+        monthsYearsEntry.setMonth(monthString);
+        monthsYearsEntry.setYear(yearString);
+        MonthsYears newMonthsYearsEntry = monthsYearsRepository.save(monthsYearsEntry);
+        Long monthsYearsId = newMonthsYearsEntry.getId();
 
-        MonthYear newMonthYear = createMonthYear.get();
-        Long monthYearId = newMonthYear.getId();
-
-        logger.info("Created MonthYear entry with ID: {}", monthYearId);
+        logger.info("Created MonthsYears entry with ID: {}", monthsYearsId);
 
         try {
             CompletableFuture<OpenMeteoData> fetchWeatherData = weatherDataFetcher.fetchWeatherData(month, year,
                     source);
             OpenMeteoData openMeteoData = fetchWeatherData.get();
             List<WeatherData> openMeteoToWeatherData = weatherDataMapper.mapOpenMeteoToWeatherData(openMeteoData,
-                    monthYearId);
+                    monthsYearsId);
 
             logger.info("Mapped {} weather data entries", openMeteoToWeatherData.size());
 
