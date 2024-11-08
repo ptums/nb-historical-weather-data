@@ -4,7 +4,6 @@ import com.example.api.model.*;
 import com.example.api.service.WeatherDataService;
 import java.util.List;
 
-import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,6 @@ import java.time.LocalDate;
 public class WeatherDataController {
 
     private final WeatherDataService weatherDataService;
-    private static final Logger logger = LoggerFactory.getLogger(WeatherDataService.class);
 
     @Autowired
     public WeatherDataController(WeatherDataService weatherDataService) {
@@ -42,7 +40,6 @@ public class WeatherDataController {
             // Extract the month and year as integers
             int month = today.getMonthValue();
             int year = today.getYear();
-            logger.debug("month: {}, year: {} -- controller", month, year);
             List<WeatherData> weatherData = weatherDataService.getWeatherData(year, month, "today");
             return ResponseEntity.ok(weatherData);
         } catch (RuntimeException e) {
