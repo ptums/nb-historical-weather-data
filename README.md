@@ -5,6 +5,8 @@
 - Sidebar of searched dates store in indexDB labeled "History"
 - Deploy backend
 
+### History Mode
+
 ### Comparison Mode
 
 #### UI:

@@ -11,3 +11,8 @@ body {
     --radius: 0.5rem;
   }
 }
+
+.table-container {
+  height: 550px;
+  overflow: auto;
+}
