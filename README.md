@@ -1,6 +1,8 @@
 # New Brunswick, NJ Historical Weather Data
 
-See about:
+## To DO
+
+- Fix POST request in API
 
 ## MVP
 

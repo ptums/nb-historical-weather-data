@@ -25,3 +25,23 @@ export function getMonthName(monthNumber: number): string {
   const index = (((monthNumber - 1) % 12) + 12) % 12;
   return months[index];
 }
+
+export async function fetchWeatherData(month: number, year: number) {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/monthly`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ month, year }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return [...data];
+}

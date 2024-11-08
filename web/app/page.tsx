@@ -12,6 +12,7 @@ import KeyListener from "./key-listener";
 import { useCallback, useEffect, useMemo } from "react";
 import { Sidebar } from "./ui/displays/sidebar";
 import ToggleFetchToggle from "./ui/toggle-fetch";
+import { WeatherDataProvider } from "./context/weather-data-context";
 
 const queryClient = new QueryClient();
 
@@ -99,11 +100,13 @@ const Page = () => {
 export default function Home() {
   return (
     <QueryClientProvider client={queryClient}>
-      <YearMonthProvider>
-        <ToggleFetchProvider>
-          <Page />
-        </ToggleFetchProvider>
-      </YearMonthProvider>
+      <WeatherDataProvider>
+        <YearMonthProvider>
+          <ToggleFetchProvider>
+            <Page />
+          </ToggleFetchProvider>
+        </YearMonthProvider>
+      </WeatherDataProvider>
     </QueryClientProvider>
   );
 }

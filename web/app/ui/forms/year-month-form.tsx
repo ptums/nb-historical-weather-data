@@ -8,6 +8,10 @@ import { MonthPicker } from "./month-picker";
 import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { fetchWeatherData } from "@/lib/utils";
+import { useWeatherData } from "@/app/context/weather-data-context";
+import { WeatherData } from "@/lib/types";
 
 const schema = yup.object().shape({
   month: yup
@@ -37,8 +41,8 @@ const schema = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 
 export function YearMonthForm() {
-  const { month, setMonth, year, setYear, setIsSubmitted, isSubmitted } =
-    useYearMonth();
+  const { month, setMonth, year, setYear, isSubmitted } = useYearMonth();
+  const { setWeatherData } = useWeatherData();
   const {
     handleSubmit,
     formState: { errors },
@@ -51,13 +55,31 @@ export function YearMonthForm() {
     },
   });
 
+  const mutation = useMutation<
+    WeatherData[],
+    Error,
+    { month: number; year: number }
+  >({
+    mutationFn: ({ month, year }) => fetchWeatherData(month, year),
+    onSuccess: (data) => {
+      console.log("Weather data fetched successfully:", data);
+      // You can do something with the data here, like updating state or context
+    },
+    onError: (error) => {
+      console.error("Error fetching weather data:", error);
+      // You can handle the error here, like showing an error message
+    },
+  });
+
   const onSubmit = (data: FormData) => {
     setMonth(data.month as string);
     setYear(typeof data.year === "number" ? data.year : 1850);
 
-    setTimeout(() => {
-      setIsSubmitted(true);
-    }, 500);
+    if (data.month && data.year) {
+      mutation.mutate({ month: parseInt(month), year });
+    }
+
+    // mutation.mutate();
   };
 
   return (

@@ -2,16 +2,14 @@ package com.example.api.controller;
 
 import com.example.api.model.*;
 import com.example.api.service.WeatherDataService;
-import java.time.Duration;
 import java.util.List;
 
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/weather")
@@ -25,24 +23,61 @@ public class WeatherDataController {
         this.weatherDataService = weatherDataService;
     }
 
-    @GetMapping(value = "/monthly/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<WeatherData>> getMonthlyWeatherData(
-            @PathVariable int year,
-            @PathVariable @DateTimeFormat(pattern = "MM") int month) {
+    @PostMapping(value = "/monthly", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<WeatherData>> postMonthlyWeatherData(@RequestBody MonthlyWeatherRequest request) {
         try {
-            List<WeatherData> weatherData = weatherDataService.getWeatherDataForMonth(year, month);
+            List<WeatherData> weatherData = weatherDataService.getWeatherDataForMonth(request.getYear(),
+                    request.getMonth());
             return ResponseEntity.ok(weatherData);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping(value = "/stream/{year}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<WeatherData> streamMonthlyWeatherData(
-            @PathVariable int year,
-            @PathVariable @DateTimeFormat(pattern = "MM") int month) {
-        List<WeatherData> monthlyData = weatherDataService.getWeatherDataForMonth(year, month);
-        return Flux.fromIterable(monthlyData)
-                .delayElements(Duration.ofMillis(100)); // Delay each element by 100ms for demonstration
+    @GetMapping(value = "/today", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<WeatherData>> getTodaysWeatherData() {
+        try {
+            LocalDate today = LocalDate.now();
+
+            // Extract the month and year as integers
+            int month = today.getMonthValue();
+            int year = today.getYear();
+            List<WeatherData> weatherData = weatherDataService.getWeatherDataForMonth(year, month);
+            return ResponseEntity.ok(weatherData);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+
+class MonthlyWeatherRequest {
+    private int year;
+    private int month;
+
+    // Default constructor
+    public MonthlyWeatherRequest() {
+    }
+
+    // Constructor with parameters
+    public MonthlyWeatherRequest(int year, int month) {
+        this.year = year;
+        this.month = month;
+    }
+
+    // Getters and setters
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
     }
 }

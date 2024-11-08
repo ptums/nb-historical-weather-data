@@ -9,32 +9,15 @@ import {
 
 import { useYearMonth } from "@/app/context/year-month-context";
 import { getMonthName } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import { dummieData } from "@/lib/dummie-data";
 import { columns } from "./columns";
 import { useToggleFetch } from "@/app/context/toggle-fetch-context";
 
-const fetchWeatherData = async (month: number, year: number) => {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/monthly/${year}/${month}`;
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-
-  return [...data];
-};
-
 export const WeatherTable = () => {
-  const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
+  const { month, year, setIsSubmitted } = useYearMonth();
   const { isToggleFetch } = useToggleFetch();
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
-    queryFn: () => fetchWeatherData(parseInt(month), year),
-    enabled: isSubmitted && isToggleFetch, // This will only enable the query when isSubmitted is true
-    staleTime: Infinity, // You might want to adjust this based on how often you need fresh data
-  });
+
+  const data = null;
 
   const weatherData = useMemo(() => {
     if (isToggleFetch) {
@@ -58,9 +41,9 @@ export const WeatherTable = () => {
     }
   }, [weatherData, setIsSubmitted]);
 
-  if (isLoading) return <div>Loading weather data...</div>;
-  if (error)
-    return <div>Error fetching weather data: {(error as Error).message}</div>;
+  // if (isLoading) return <div>Loading weather data...</div>;
+  // if (error)
+  //   return <div>Error fetching weather data: {(error as Error).message}</div>;
 
   return (
     <div className="mt-6 p-2">
