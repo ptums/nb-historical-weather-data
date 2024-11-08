@@ -10,8 +10,6 @@ export default function ToggleFetchToggle() {
   const { isToggleFetch, toggleToggleFetch, isDisplayToggleFetch } =
     useToggleFetch();
 
-  console.log("isDisplayToggleFetch", isDisplayToggleFetch);
-
   return (
     <div
       className={classNames("items-center space-x-2", {

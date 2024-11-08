@@ -24,6 +24,7 @@ import { dummieItems } from "@/lib/dummie-data";
 import { WeatherData } from "@/lib/types";
 import {
   checkIndexedDB,
+  currentDateMilliseconds,
   fetchTodayWeatherData,
   storeInIndexedDB,
 } from "@/lib/utils";
@@ -41,7 +42,6 @@ const Page = () => {
     try {
       const storedDisplayToggleFetch =
         localStorage.getItem("displayToggleFetch");
-      console.log("storedDisplayToggleFetch", storedDisplayToggleFetch);
       if (storedDisplayToggleFetch !== null) {
         const shouldDisplay = storedDisplayToggleFetch === "true";
         setIsToggleFetch(shouldDisplay);
@@ -71,8 +71,11 @@ const Page = () => {
   useEffect(() => {
     const checkData = async () => {
       const existingData = await checkIndexedDB();
-      if (existingData) {
-        setWeatherData(existingData);
+      if (
+        existingData.weatherData &&
+        currentDateMilliseconds === existingData.storedDate
+      ) {
+        setWeatherData(existingData.weatherData);
       } else {
         setShouldFetch(true);
       }

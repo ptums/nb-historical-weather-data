@@ -2,6 +2,12 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { WeatherData } from "./types";
 
+const currentDate = new Date();
+const currentMonth = currentDate.getMonth();
+export const currentDateMilliseconds = currentDate.getMilliseconds();
+export const defaultYear = currentDate.getFullYear();
+export const defaultMonth = (currentMonth + 1).toString();
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -62,25 +68,55 @@ export async function fetchTodayWeatherData() {
 }
 
 // Function to check IndexedDB for existing data
-export const checkIndexedDB = async (): Promise<WeatherData[] | null> => {
+export const checkIndexedDB = async (): Promise<{
+  weatherData: WeatherData[] | null;
+  storedDate: number | null;
+}> => {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("MonthsWeatherDB", 1);
+    const request = indexedDB.open("MonthsWeatherDB", 2);
 
     request.onerror = () => reject("Error opening database");
 
     request.onsuccess = () => {
       const db = request.result;
-      const transaction = db.transaction("weatherData", "readonly");
-      const store = transaction.objectStore("weatherData");
-      const getRequest = store.get("weatherData");
+      const transaction = db.transaction(
+        ["weatherData", "storedDate"],
+        "readonly"
+      );
+      const weatherStore = transaction.objectStore("weatherData");
+      const dateStore = transaction.objectStore("storedDate");
 
-      getRequest.onerror = () => reject("Error fetching data from IndexedDB");
-      getRequest.onsuccess = () => resolve(getRequest.result);
+      const weatherRequest = weatherStore.get("weatherData");
+      const dateRequest = dateStore.get("currentDate");
+
+      let weatherData: WeatherData[] | null = null;
+      let storedDate: number | null = null;
+
+      weatherRequest.onsuccess = () => {
+        weatherData = weatherRequest.result;
+        if (dateRequest.readyState === "done") {
+          resolve({ weatherData, storedDate });
+        }
+      };
+
+      dateRequest.onsuccess = () => {
+        storedDate = dateRequest.result;
+        if (weatherRequest.readyState === "done") {
+          resolve({ weatherData, storedDate });
+        }
+      };
+
+      transaction.onerror = () => reject("Error fetching data from IndexedDB");
     };
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      db.createObjectStore("weatherData");
+      if (!db.objectStoreNames.contains("weatherData")) {
+        db.createObjectStore("weatherData");
+      }
+      if (!db.objectStoreNames.contains("storedDate")) {
+        db.createObjectStore("storedDate");
+      }
     };
   });
 };
@@ -88,23 +124,40 @@ export const checkIndexedDB = async (): Promise<WeatherData[] | null> => {
 // Function to store data in IndexedDB
 export const storeInIndexedDB = async (data: WeatherData[]): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("MonthsWeatherDB", 1);
+    const request = indexedDB.open("MonthsWeatherDB", 2);
 
     request.onerror = () => reject("Error opening database");
 
     request.onsuccess = () => {
       const db = request.result;
-      const transaction = db.transaction("weatherData", "readwrite");
-      const store = transaction.objectStore("weatherData");
-      const putRequest = store.put(data, "weatherData");
+      const transaction = db.transaction(
+        ["weatherData", "storedDate"],
+        "readwrite"
+      );
+      const weatherStore = transaction.objectStore("weatherData");
+      const dateStore = transaction.objectStore("storedDate");
 
-      putRequest.onerror = () => reject("Error storing data in IndexedDB");
-      putRequest.onsuccess = () => resolve();
+      const weatherPutRequest = weatherStore.put(data, "weatherData");
+      const datePutRequest = dateStore.put(
+        currentDateMilliseconds,
+        "currentDate"
+      );
+
+      weatherPutRequest.onerror = () =>
+        reject("Error storing weather data in IndexedDB");
+      datePutRequest.onerror = () => reject("Error storing date in IndexedDB");
+
+      transaction.oncomplete = () => resolve();
+    };
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains("weatherData")) {
+        db.createObjectStore("weatherData");
+      }
+      if (!db.objectStoreNames.contains("storedDate")) {
+        db.createObjectStore("storedDate");
+      }
     };
   });
 };
-
-const currentDate = new Date();
-const currentMonth = currentDate.getMonth();
-export const defaultYear = currentDate.getFullYear();
-export const defaultMonth = (currentMonth + 1).toString();
