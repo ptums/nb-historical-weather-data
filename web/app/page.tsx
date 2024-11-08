@@ -2,7 +2,11 @@
 
 import { SiteTitle, WeatherTable, YearMonthForm } from "./ui";
 import { YearMonthProvider } from "./context/year-month-context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   ToggleFetchProvider,
   useToggleFetch,
@@ -12,13 +16,26 @@ import KeyListener from "./key-listener";
 import { useCallback, useEffect, useMemo } from "react";
 import { Sidebar } from "./ui/displays/sidebar";
 import ToggleFetchToggle from "./ui/toggle-fetch";
-import { WeatherDataProvider } from "./context/weather-data-context";
+import {
+  useWeatherData,
+  WeatherDataProvider,
+} from "./context/weather-data-context";
+import { dummieItems } from "@/lib/dummie-data";
+import { WeatherData } from "@/lib/types";
+import {
+  checkIndexedDB,
+  fetchTodayWeatherData,
+  storeInIndexedDB,
+} from "@/lib/utils";
 
 const queryClient = new QueryClient();
 
 const Page = () => {
   const { isToggleFetch, setIsToggleFetch } = useToggleFetch();
+  const [shouldFetch, setShouldFetch] = useState(false);
+  const { setWeatherData } = useWeatherData();
 
+  // Sync display toggle fetch
   const syncDisplayToggleFetch = useCallback(() => {
     try {
       const storedDisplayToggleFetch =
@@ -49,25 +66,36 @@ const Page = () => {
     };
   }, [syncDisplayToggleFetch]);
 
-  const historyItems = useMemo(() => {
-    const items = [];
-    for (let i = 0; i < 5; i++) {
-      const year = Math.floor(Math.random() * (2024 - 1940 + 1)) + 1940;
-      const month = Math.floor(Math.random() * 12) + 1;
-      items.push({ year, month });
-    }
-    return items;
+  // get the latest weather data
+  useEffect(() => {
+    const checkData = async () => {
+      const existingData = await checkIndexedDB();
+      if (existingData) {
+        setWeatherData(existingData);
+      } else {
+        setShouldFetch(true);
+      }
+    };
+    checkData();
   }, []);
 
-  const comparisonItems = useMemo(() => {
-    const items = [];
-    for (let i = 0; i < 5; i++) {
-      const year = Math.floor(Math.random() * (2024 - 1940 + 1)) + 1940;
-      const month = Math.floor(Math.random() * 12) + 1;
-      items.push({ year, month });
+  const { data } = useQuery<WeatherData[], Error>({
+    queryKey: ["weatherData"],
+    queryFn: fetchTodayWeatherData,
+    enabled: shouldFetch,
+  });
+
+  useEffect(() => {
+    if (data) {
+      storeInIndexedDB(data);
+      setWeatherData(data);
     }
-    return items;
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  // Dummie items
+  const historyItems = useMemo(() => dummieItems(), []);
+  const comparisonItems = useMemo(() => dummieItems(), []);
 
   return (
     <>
@@ -109,4 +137,7 @@ export default function Home() {
       </WeatherDataProvider>
     </QueryClientProvider>
   );
+}
+function useState(arg0: boolean): [any, any] {
+  throw new Error("Function not implemented.");
 }

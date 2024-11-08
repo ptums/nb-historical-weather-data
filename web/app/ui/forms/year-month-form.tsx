@@ -9,7 +9,7 @@ import { YearInput } from "./year-input";
 import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { fetchWeatherData } from "@/lib/utils";
+import { fetchMonthWeatherData } from "@/lib/utils";
 import { useWeatherData } from "@/app/context/weather-data-context";
 import { WeatherData } from "@/lib/types";
 
@@ -60,7 +60,7 @@ export function YearMonthForm() {
     Error,
     { month: number; year: number }
   >({
-    mutationFn: ({ month, year }) => fetchWeatherData(month, year),
+    mutationFn: ({ month, year }) => fetchMonthWeatherData(month, year),
     onSuccess: (data) => {
       console.log("Weather data fetched successfully");
       setWeatherData(data as WeatherData[]);

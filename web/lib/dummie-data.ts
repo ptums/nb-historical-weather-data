@@ -218,3 +218,13 @@ export const dummieData: WeatherData[] = [
     windSpeed: 12,
   },
 ];
+
+export const dummieItems = () => {
+  const items = [];
+  for (let i = 0; i < 5; i++) {
+    const year = Math.floor(Math.random() * (2024 - 1940 + 1)) + 1940;
+    const month = Math.floor(Math.random() * 12) + 1;
+    items.push({ year, month });
+  }
+  return items;
+};
