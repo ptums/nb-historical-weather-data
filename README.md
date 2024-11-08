@@ -4,6 +4,7 @@
 
 - Sidebar of searched dates store in indexDB labeled "History"
 - Deploy backend
+- Do a BE code cleanup
 
 ### History Mode
 
