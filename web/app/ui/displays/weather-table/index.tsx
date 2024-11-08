@@ -12,12 +12,12 @@ import { getMonthName } from "@/lib/utils";
 import { dummieData } from "@/lib/dummie-data";
 import { columns } from "./columns";
 import { useToggleFetch } from "@/app/context/toggle-fetch-context";
+import { useWeatherData } from "@/app/context/weather-data-context";
 
 export const WeatherTable = () => {
   const { month, year, setIsSubmitted } = useYearMonth();
   const { isToggleFetch } = useToggleFetch();
-
-  const data = null;
+  const { weatherData: data } = useWeatherData();
 
   const weatherData = useMemo(() => {
     if (isToggleFetch) {

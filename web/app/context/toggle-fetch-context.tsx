@@ -13,6 +13,7 @@ type ToggleFetchContextType = {
   toggleToggleFetch: () => void;
   isDisplayToggleFetch: boolean;
   toggleDisplayToggleFetch: () => void;
+  setIsToggleFetch: (toggleFetch: boolean) => void;
 };
 
 const ToggleFetchContext = createContext<ToggleFetchContextType | undefined>(
@@ -46,6 +47,7 @@ export function ToggleFetchProvider({ children }: { children: ReactNode }) {
         toggleToggleFetch,
         isDisplayToggleFetch,
         toggleDisplayToggleFetch,
+        setIsToggleFetch,
       }}
     >
       {children}

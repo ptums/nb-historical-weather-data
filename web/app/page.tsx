@@ -17,7 +17,7 @@ import { WeatherDataProvider } from "./context/weather-data-context";
 const queryClient = new QueryClient();
 
 const Page = () => {
-  const { isToggleFetch, toggleDisplayToggleFetch } = useToggleFetch();
+  const { isToggleFetch, setIsToggleFetch } = useToggleFetch();
 
   const syncDisplayToggleFetch = useCallback(() => {
     try {
@@ -26,12 +26,12 @@ const Page = () => {
       console.log("storedDisplayToggleFetch", storedDisplayToggleFetch);
       if (storedDisplayToggleFetch !== null) {
         const shouldDisplay = storedDisplayToggleFetch === "true";
-        toggleDisplayToggleFetch(shouldDisplay);
+        setIsToggleFetch(shouldDisplay);
       }
     } catch (error) {
       console.error("Error accessing localStorage:", error);
     }
-  }, [toggleDisplayToggleFetch]);
+  }, [setIsToggleFetch]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

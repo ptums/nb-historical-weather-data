@@ -62,7 +62,8 @@ export function YearMonthForm() {
   >({
     mutationFn: ({ month, year }) => fetchWeatherData(month, year),
     onSuccess: (data) => {
-      console.log("Weather data fetched successfully:", data);
+      console.log("Weather data fetched successfully");
+      setWeatherData(data as WeatherData[]);
       // You can do something with the data here, like updating state or context
     },
     onError: (error) => {

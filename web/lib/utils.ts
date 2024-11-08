@@ -27,7 +27,7 @@ export function getMonthName(monthNumber: number): string {
 }
 
 export async function fetchWeatherData(month: number, year: number) {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/monthly`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/month`;
 
   const response = await fetch(url, {
     method: "POST",

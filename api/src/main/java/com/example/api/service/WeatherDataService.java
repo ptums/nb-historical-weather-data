@@ -33,7 +33,7 @@ public class WeatherDataService {
         this.weatherDataFetcher = weatherDataFetcher;
     }
 
-    public List<WeatherData> getWeatherDataForMonth(int year, int month) {
+    public List<WeatherData> getWeatherData(int year, int month, String source) {
         String monthString = String.format("%02d", month);
         String yearString = String.valueOf(year);
         logger.info("Searching for weather data for month: {} and year: {}", monthString, yearString);
@@ -43,13 +43,11 @@ public class WeatherDataService {
         logger.debug("monthYearOptional.isEmpty() {}", monthYearOptional.isEmpty());
 
         if (monthYearOptional.isEmpty()) {
-            logger.info("HIT 1");
-            List<WeatherData> weatherDataList = createWeatherData(month, year, monthString, yearString);
+            List<WeatherData> weatherDataList = createWeatherData(month, year, monthString, yearString, source);
             return weatherDataList;
         } else {
             MonthYear monthYear = monthYearOptional.get();
             logger.debug("monthYear() {}", monthYear);
-            logger.info("HIT 2");
             List<WeatherData> weatherDataList = findWeatherData(monthYear.getId(), monthString, yearString);
             return weatherDataList;
         }
@@ -82,7 +80,8 @@ public class WeatherDataService {
     }
 
     @Transactional
-    public List<WeatherData> createWeatherData(int month, int year, String monthString, String yearString) {
+    public List<WeatherData> createWeatherData(int month, int year, String monthString, String yearString,
+            String source) {
         logger.info("Creating weather data for month: {} and year: {}", monthString, yearString);
 
         // Create a new months_years entry
@@ -97,7 +96,8 @@ public class WeatherDataService {
         logger.info("Created MonthYear entry with ID: {}", monthYearId);
 
         try {
-            CompletableFuture<OpenMeteoData> fetchWeatherData = weatherDataFetcher.fetchWeatherData(month, year);
+            CompletableFuture<OpenMeteoData> fetchWeatherData = weatherDataFetcher.fetchWeatherData(month, year,
+                    source);
             OpenMeteoData openMeteoData = fetchWeatherData.get();
             List<WeatherData> openMeteoToWeatherData = weatherDataMapper.mapOpenMeteoToWeatherData(openMeteoData,
                     monthYearId);

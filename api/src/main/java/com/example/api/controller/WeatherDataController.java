@@ -23,11 +23,11 @@ public class WeatherDataController {
         this.weatherDataService = weatherDataService;
     }
 
-    @PostMapping(value = "/monthly", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<WeatherData>> postMonthlyWeatherData(@RequestBody MonthlyWeatherRequest request) {
+    @PostMapping(value = "/month", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<WeatherData>> postMonthlyWeatherData(@RequestBody MonthWeatherRequest request) {
         try {
-            List<WeatherData> weatherData = weatherDataService.getWeatherDataForMonth(request.getYear(),
-                    request.getMonth());
+            List<WeatherData> weatherData = weatherDataService.getWeatherData(request.getYear(),
+                    request.getMonth(), "month");
             return ResponseEntity.ok(weatherData);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -42,7 +42,8 @@ public class WeatherDataController {
             // Extract the month and year as integers
             int month = today.getMonthValue();
             int year = today.getYear();
-            List<WeatherData> weatherData = weatherDataService.getWeatherDataForMonth(year, month);
+            logger.debug("month: {}, year: {} -- controller", month, year);
+            List<WeatherData> weatherData = weatherDataService.getWeatherData(year, month, "today");
             return ResponseEntity.ok(weatherData);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -50,16 +51,16 @@ public class WeatherDataController {
     }
 }
 
-class MonthlyWeatherRequest {
+class MonthWeatherRequest {
     private int year;
     private int month;
 
     // Default constructor
-    public MonthlyWeatherRequest() {
+    public MonthWeatherRequest() {
     }
 
     // Constructor with parameters
-    public MonthlyWeatherRequest(int year, int month) {
+    public MonthWeatherRequest(int year, int month) {
         this.year = year;
         this.month = month;
     }
