@@ -13,7 +13,7 @@ import {
 } from "./context/toggle-fetch-context";
 import classNames from "classnames";
 import KeyListener from "./key-listener";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Sidebar } from "./ui/displays/sidebar";
 import ToggleFetchToggle from "./ui/toggle-fetch";
 import {
@@ -137,7 +137,4 @@ export default function Home() {
       </WeatherDataProvider>
     </QueryClientProvider>
   );
-}
-function useState(arg0: boolean): [any, any] {
-  throw new Error("Function not implemented.");
 }
