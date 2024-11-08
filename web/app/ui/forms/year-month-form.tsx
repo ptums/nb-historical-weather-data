@@ -10,7 +10,7 @@ import { useYearMonth } from "@/app/context/year-month-context";
 import { Button } from "@/components/ui/button";
 import { SiteTitle } from "../site-title";
 import classNames from "classnames";
-import { useDarkMode } from "@/app/context/dark-mode-context";
+import { useToggleFetch } from "@/app/context/toggle-fetch-context";
 
 const schema = yup.object().shape({
   month: yup
@@ -42,7 +42,7 @@ type FormData = yup.InferType<typeof schema>;
 export function YearMonthForm() {
   const { month, setMonth, year, setYear, setIsSubmitted, isSubmitted } =
     useYearMonth();
-  const { isDarkMode } = useDarkMode();
+  const { isToggleFetch } = useToggleFetch();
   const {
     handleSubmit,
     formState: { errors },
@@ -69,8 +69,8 @@ export function YearMonthForm() {
       <SiteTitle />
       <div
         className={classNames("rounded-3xl p-8 shadow-lg", {
-          "bg-white": !isDarkMode,
-          "bg-yellow-50": isDarkMode,
+          "bg-white": !isToggleFetch,
+          "bg-yellow-50": isToggleFetch,
         })}
       >
         <form

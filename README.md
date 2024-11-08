@@ -9,3 +9,4 @@ See about:
 - BE: best pogramming language for CI/CD development & cloud infrastructure (cost, secure, dev focused)
 - Connect weather-data to dummie mode and disable it 100% in prod.
 - Default to todays date and store the latest month in indexDB if its already been grabbed
+- Deploy backend

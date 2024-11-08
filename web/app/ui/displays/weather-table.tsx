@@ -10,12 +10,12 @@ import {
 import { useYearMonth } from "@/app/context/year-month-context";
 import { getMonthName } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { DUMMIE_DATA_FLAG } from "@/lib/constants";
 import { dummieData } from "@/lib/dummie-data";
 import { columns } from "./columns";
+import { useToggleFetch } from "@/app/context/toggle-fetch-context";
 
 const fetchWeatherData = async (month: number, year: number) => {
-  const url = `http://localhost:8080/api/weather/monthly/${year}/${month}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/weather/monthly/${year}/${month}`;
   const response = await fetch(url);
   const data = await response.json();
 
@@ -28,26 +28,29 @@ const fetchWeatherData = async (month: number, year: number) => {
 
 export function WeatherTable() {
   const { month, year, isSubmitted, setIsSubmitted } = useYearMonth();
+  const { isToggleFetch } = useToggleFetch();
   const { data, isLoading, error } = useQuery({
     queryKey: ["weatherData", month, year], // Including month and year for cache uniqueness
     queryFn: () => fetchWeatherData(parseInt(month), year),
-    enabled: isSubmitted && !DUMMIE_DATA_FLAG, // This will only enable the query when isSubmitted is true
+    enabled: isSubmitted && isToggleFetch, // This will only enable the query when isSubmitted is true
     staleTime: Infinity, // You might want to adjust this based on how often you need fresh data
   });
 
   const weatherData = useMemo(() => {
-    if (DUMMIE_DATA_FLAG) {
+    if (isToggleFetch) {
       return dummieData;
     }
 
     return data ? data : [];
-  }, [data]);
+  }, [data, isToggleFetch]);
 
   const table = useReactTable({
     data: weatherData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  console.log(weatherData);
 
   useEffect(() => {
     if (weatherData.length > 0) {
